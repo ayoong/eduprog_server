@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model transaksi2 {
+  norec         String   @id @db.VarChar(15)
+  aktivitas     String   @db.VarChar(2)
+  dt            String   @db.VarChar(10)
+  supplier      String   @db.VarChar(20)
+  tanggal       DateTime @db.Date
+  tanggal_shift String   @db.VarChar(30)
+  tanggal_in    DateTime @db.Date
+  tanggal_out   DateTime @db.Date
+  jam_in        DateTime @db.Time(0)
+  jam_out       DateTime @db.Time(0)
+  bruto         Float
+  tara          Float
+  netto         Float
+  netto_rekon   Float
+  opr           String   @db.VarChar(50)
+  seam          String   @db.VarChar(6)
+}
+
+model user {
+  id             Int      @id @default(autoincrement())
+  user_name      String   @db.VarChar(50)
+  user_password  String   @db.VarChar(32)
+  user_full_name String   @db.VarChar(255)
+  hak_akses      String   @db.VarChar(100)
+  last_request   DateTime @db.DateTime(0)
+  user_session   String   @db.VarChar(50)
+}
+
+model users {
+  id             Int       @id @default(autoincrement())
+  user_name      String?   @db.VarChar(50)
+  user_password  String?   @db.VarChar(32)
+  user_full_name String?   @db.VarChar(255)
+  last_request   DateTime? @db.DateTime(0)
+  user_session   String?   @db.VarChar(50)
+}
