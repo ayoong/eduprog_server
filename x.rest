@@ -14,3 +14,7 @@ Content-Type: application/json
 
 POST http://appgtw.arutmin.com/Timbangan_service/Timbangan_service/api/ HTTP/1.1
 Content-Type: application/json
+
+### cek transakasi
+
+GET http://localhost:3000/transaksi HTTP/1.1

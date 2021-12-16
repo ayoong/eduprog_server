@@ -35,7 +35,17 @@ app.get('/users', expressAsyncHandler(async (req, res) => {
 }));
 
 app.get('/transaksi', expressAsyncHandler(async (req, res) => {
-    const data = await  prisma.transaksi2.findMany();
+    const data = await  prisma.transaksi2.findMany({
+        skip: 0,
+        take: 200,
+        select: {
+            dt: true,
+            supplier: true,
+            jam_in: true,
+            netto_rekon: true,
+            tanggal_shift: true
+        }
+    });
     res.json(data);
 }));
 
