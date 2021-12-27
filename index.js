@@ -34,20 +34,121 @@ app.get('/users', expressAsyncHandler(async (req, res) => {
     res.json(data);
 }));
 
-app.get('/transaksi', expressAsyncHandler(async (req, res) => {
+app.get('/transaksi/:tanggal', expressAsyncHandler(async (req, res) => {
+    const tanggal = req.params.tanggal;
     const data = await  prisma.transaksi2.findMany({
-        skip: 0,
-        take: 200,
+        // skip: 0,
+        // take: 200,
+        // orderBy: {
+        //     jam_in: "desc"
+        // },
         select: {
             dt: true,
             supplier: true,
             jam_in: true,
             netto_rekon: true,
-            tanggal_shift: true
+            tanggal_shift: true,
+            tanggal_in: true
+        },
+        where: {
+            tanggal_in: new Date(tanggal),
+
         }
     });
     res.json(data);
 }));
+
+app.get('/chart', expressAsyncHandler(async (req, res) => {
+    let chart = await prisma.transaksi2.findMany({
+        select: {
+            jam_in: true,
+            netto_rekon: true
+        },
+        orderBy: {
+            jam_in: "asc"
+        }
+    })
+
+    let data = chart.map((e) => {
+        return {
+            "jam": new Date(e.jam_in).getHours(),
+            "net": e['netto_rekon']
+        }
+    }).sort(function(a, b) {
+        return parseFloat(a.jam) - parseFloat(b.jam);
+    });
+
+    var output = data.reduce(function(accumulator, cur) {
+        var jam = cur.jam;
+        var found = accumulator.find(function(elem) {
+            return elem.jam == jam
+        });
+
+        if (found) found.net += cur.net;
+        else accumulator.push(cur);
+        return accumulator;
+      }, []);
+
+
+    res.json(output)
+}));
+
+
+app.get('/transaksiBulan/:tanggal', expressAsyncHandler(async (req, res) => {
+    let tanggalAwal = new Date(req.params.tanggal).setDate(01);
+    let tanggalAkhir = new Date(req.params.tanggal).setDate(31);
+
+    let bln = await prisma.transaksi2.findMany({
+        select: {
+            tanggal: true,
+            netto_rekon: true
+        },
+        where: {
+            tanggal: {
+                lte: new Date(tanggalAkhir),
+                gte: new Date(tanggalAwal)
+            }
+        }
+    });
+
+    let data = bln.map((e) => {
+        return {
+            "tanggal": new Date(e.tanggal).getDate(),
+            "net": e['netto_rekon']
+        }
+    }).sort(function(a, b) {
+        return parseFloat(a.jam) - parseFloat(b.jam);
+    });
+
+    var output = data.reduce(function(accumulator, cur) {
+        var tanggal = cur.tanggal;
+        var found = accumulator.find(function(elem) {
+            return elem.tanggal == tanggal
+        });
+
+        if (found) found.net += cur.net;
+        else accumulator.push(cur);
+        return accumulator;
+      }, []);
+
+
+    return res.json(output);
+}))
+
+
+app.get('/ritAndTonase', expressAsyncHandler(async (req, res) => {
+    let data = await prisma.transaksi2.aggregate({
+        _count: true,
+        _sum: {
+            netto_rekon: true
+        }
+    });
+
+    res.json({
+        "rit": data['_count'],
+        "tonase": data['_sum']['netto_rekon']
+    });
+}))
 
 
 app.listen(3000, () => console.log('server run on port 3000'));
