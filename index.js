@@ -95,7 +95,7 @@ app.get('/transaksiPerBulan/:tanggal', expressAsyncHandler(async (req, res) => {
     res.json(data);
 }));
 
-app.get('/chart', expressAsyncHandler(async (req, res) => {
+app.get('/chart/:tanggal', expressAsyncHandler(async (req, res) => {
     let chart = await prisma.transaksi2.findMany({
         select: {
             jam_in: true,
@@ -103,6 +103,9 @@ app.get('/chart', expressAsyncHandler(async (req, res) => {
         },
         orderBy: {
             jam_in: "asc"
+        },
+        where: {
+            tanggal: new Date(req.params.tanggal)
         }
     })
 
@@ -220,6 +223,20 @@ app.get('/ritTonasePerBulan/:tanggal', expressAsyncHandler(async (req, res) => {
         "rit": data['_count'],
         "tonase": data['_sum']['netto_rekon']
     });
+}))
+
+app.get('/jamTerakhir', expressAsyncHandler(async (req, res) => {
+    let jam = await prisma.transaksi2.aggregate({
+        _max: {
+            tanggal: true,
+            jam_out: true
+        },
+    })
+
+    res.json({
+        "tanggal": jam._max.tanggal,
+        "jam": jam._max.jam_out
+    })
 }))
 
 

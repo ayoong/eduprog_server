@@ -1,0 +1,31 @@
+#!/bin/bash
+
+WT=$(date +"%d%m%y-%T")
+MENU() {
+    local MN="
+    PERINTAH:
+    ------------------------------
+    run         menjalankan server
+    push        push ke github , (lakukan jika paham )
+    xcoba       menjalankan file xcoba
+    h / help    menampilkan bantuan  / menu
+
+
+    PENGGUNAAN:
+    dengan git bash - ./xhelp [parameter]
+    contoh : ./xhelp run - untuk menjalankan server
+    "
+    echo "$MN"
+}
+
+PERINTAH() {
+    case $1 in
+    run) nodemon . ;;
+    push) git add . && git commit -m $WT && git push origin main ;;
+    xcoba) ./xcoba ;;
+    h | help) MENU ;;
+    *) echo "command belum ada " ;;
+    esac
+}
+
+[[ -n $1 ]] && PERINTAH $1 || MENU
